@@ -116,7 +116,7 @@ export default function ConvertForm() {
     setProgressStep(0);
   }
 
-  // ── RESULTS VIEW ──
+  // ââ RESULTS VIEW ââ
   if (result) {
     return (
       <div className="animate-fadeIn">
@@ -127,7 +127,7 @@ export default function ConvertForm() {
           </div>
           <div className="flex items-center gap-3">
             <span className="px-3 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-bold">
-              ✓ Conversion Complete
+              â Conversion Complete
             </span>
             <button onClick={reset} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 text-slate-300 text-sm font-semibold hover:bg-slate-700 transition-colors">
               <ArrowLeft size={14} /> New Conversion
@@ -210,8 +210,8 @@ export default function ConvertForm() {
                 <p className="text-sm text-slate-400 mt-1">{result.workflow_guide.description}</p>
               </div>
               <div className="flex gap-3 text-xs text-slate-500">
-                <span>⏱ {result.workflow_guide.time_estimate}</span>
-                <span>📊 {result.workflow_guide.difficulty}</span>
+                <span>â± {result.workflow_guide.time_estimate}</span>
+                <span>ð {result.workflow_guide.difficulty}</span>
               </div>
             </div>
 
@@ -231,9 +231,9 @@ export default function ConvertForm() {
 
             {result.workflow_guide.pro_tips.length > 0 && (
               <div className="bg-teal-500/5 border border-teal-500/20 rounded-lg p-4">
-                <h4 className="text-sm font-bold text-teal-400 mb-2">💡 Pro Tips</h4>
+                <h4 className="text-sm font-bold text-teal-400 mb-2">ð¡ Pro Tips</h4>
                 {result.workflow_guide.pro_tips.map((tip, i) => (
-                  <p key={i} className="text-sm text-slate-400 mb-1">• {tip}</p>
+                  <p key={i} className="text-sm text-slate-400 mb-1">â¢ {tip}</p>
                 ))}
               </div>
             )}
@@ -243,7 +243,7 @@ export default function ConvertForm() {
     );
   }
 
-  // ── LOADING VIEW ──
+  // ââ LOADING VIEW ââ
   if (loading) {
     return (
       <div className="flex flex-col items-center py-16 animate-fadeIn">
@@ -253,7 +253,7 @@ export default function ConvertForm() {
         <div className="w-full max-w-md space-y-3">
           {PROGRESS_STEPS.map((step, i) => (
             <div key={i} className={`flex items-center gap-3 text-sm transition-all duration-300 ${i < progressStep ? "text-teal-400" : i === progressStep ? "text-white" : "text-slate-600"}`}>
-              <span className="w-5 font-bold">{i < progressStep ? "✓" : i === progressStep ? "●" : "○"}</span>
+              <span className="w-5 font-bold">{i < progressStep ? "â" : i === progressStep ? "â" : "â"}</span>
               <span>{step}</span>
             </div>
           ))}
@@ -262,16 +262,16 @@ export default function ConvertForm() {
     );
   }
 
-  // ── INPUT VIEW ──
+  // ââ INPUT VIEW ââ
   return (
     <div>
       <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-6 mb-4">
-        <h2 className="text-lg font-bold text-white mb-4">Paste your AI tip</h2>
+        <h2 className="text-lg font-bold text-white mb-4">Paste your AI tip or link</h2>
 
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder={`Paste the social media post, caption, transcript, or tip here...\n\nExample: "Turn Claude Code into your Professional Designer — Use these 3 systems to up-level the design of your next project:\n\n1. Create a design-system.md file with your brand colors, fonts, and spacing rules\n2. Use a screenshot of a design you love as reference\n3. Add a 'review' step where Claude critiques its own work..."`}
+          placeholder={`Paste a link or the text from any social media post...\n\nSupported: Instagram, TikTok, YouTube, X links — or just paste the text directly.\n\nExample: "Turn Claude Code into your Professional Designer â Use these 3 systems to up-level the design of your next project:\n\n1. Create a design-system.md file with your brand colors, fonts, and spacing rules\n2. Use a screenshot of a design you love as reference\n3. Add a 'review' step where Claude critiques its own work..."`}
           className="w-full min-h-[180px] p-4 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 font-mono leading-relaxed resize-y outline-none focus:border-teal-500/50 transition-colors placeholder:text-slate-600"
         />
 
@@ -311,7 +311,7 @@ export default function ConvertForm() {
         <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Try an example</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
-            { label: "AI Designer", text: "Turn Claude Code into your Professional Designer — Use these 3 systems to up-level the design of your next project: 1. Create a design-system.md file with your brand colors, fonts, and spacing rules. 2. Use a screenshot of a design you love as reference — Claude will match the style. 3. Add a review step where Claude critiques its own work against your design system and fixes issues automatically." },
+            { label: "AI Designer", text: "Turn Claude Code into your Professional Designer â Use these 3 systems to up-level the design of your next project: 1. Create a design-system.md file with your brand colors, fonts, and spacing rules. 2. Use a screenshot of a design you love as reference â Claude will match the style. 3. Add a review step where Claude critiques its own work against your design system and fixes issues automatically." },
             { label: "Content Engine", text: "Here's how I turned Claude into my content engine: First, I created a content-strategy.md with my brand voice, target audience, and content pillars. Then I set up a workflow where Claude generates 10 content ideas, I pick 3, and it drafts full posts optimized for each platform (LinkedIn, X, Instagram). Finally, Claude reviews each post against my brand voice guidelines and suggests improvements." },
             { label: "Email Outreach", text: "Stop writing cold emails from scratch. Here's my Claude workflow for personalized outreach: 1. Feed it the prospect's LinkedIn profile URL 2. Tell it your product and value prop 3. It generates 3 email variations with different hooks 4. Each email has a personalization line, clear value prop, and soft CTA 5. It also creates follow-up sequences for each variation." },
           ].map((ex) => (
