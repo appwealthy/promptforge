@@ -13,6 +13,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Detect if input is just a URL with no actual content
+    const trimmed = content.trim();
+    const urlOnlyRegex = /^https?:\/\/\S+$/;
+    if (urlOnlyRegex.test(trimmed)) {
+      return NextResponse.json(
+        {
+          error:
+            "It looks like you pasted a link instead of the actual content. PromptForge can't visit URLs — please copy and paste the text from the post (the caption, transcript, or tip) directly into the box.",
+        },
+        { status: 400 }
+      );
+    }
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
