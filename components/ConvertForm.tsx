@@ -1,11 +1,18 @@
 "use client";
+
 import { useState } from "react";
-import { Zap, Clipboard, Download, Loader2, ArrowLeft, BookOpen, FileCode, ListChecks } from "lucide-react";
+import { Zap, Clipboard, Download, Loader2, ArrowLeft, BookOpen, FileCode, ListChecks, Wrench } from "lucide-react";
+
+interface RecommendedTool {
+  name: string;
+  reason: string;
+}
 
 interface WorkflowStep {
   step: number;
   title: string;
   instruction: string;
+  recommended_tools?: RecommendedTool[];
 }
 
 interface ConversionResult {
@@ -34,11 +41,41 @@ interface ConversionResult {
   };
 }
 
+const TOOL_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  "claude": { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20" },
+  "chatgpt": { bg: "bg-green-500/10", text: "text-green-400", border: "border-green-500/20" },
+  "gemini": { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20" },
+  "midjourney": { bg: "bg-indigo-500/10", text: "text-indigo-400", border: "border-indigo-500/20" },
+  "perplexity": { bg: "bg-cyan-500/10", text: "text-cyan-400", border: "border-cyan-500/20" },
+  "cursor": { bg: "bg-violet-500/10", text: "text-violet-400", border: "border-violet-500/20" },
+  "v0": { bg: "bg-slate-500/10", text: "text-slate-300", border: "border-slate-500/20" },
+  "bolt": { bg: "bg-yellow-500/10", text: "text-yellow-400", border: "border-yellow-500/20" },
+  "lovable": { bg: "bg-pink-500/10", text: "text-pink-400", border: "border-pink-500/20" },
+  "canva": { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20" },
+  "notion": { bg: "bg-slate-500/10", text: "text-slate-300", border: "border-slate-500/20" },
+  "figma": { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20" },
+  "elevenlabs": { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/20" },
+  "runway": { bg: "bg-fuchsia-500/10", text: "text-fuchsia-400", border: "border-fuchsia-500/20" },
+  "suno": { bg: "bg-lime-500/10", text: "text-lime-400", border: "border-lime-500/20" },
+  "descript": { bg: "bg-sky-500/10", text: "text-sky-400", border: "border-sky-500/20" },
+  "make": { bg: "bg-violet-500/10", text: "text-violet-400", border: "border-violet-500/20" },
+  "zapier": { bg: "bg-orange-500/10", text: "text-orange-300", border: "border-orange-500/20" },
+};
+
+function getToolColor(toolName: string) {
+  const lower = toolName.toLowerCase();
+  for (const key of Object.keys(TOOL_COLORS)) {
+    if (lower.includes(key)) return TOOL_COLORS[key];
+  }
+  return { bg: "bg-teal-500/10", text: "text-teal-400", border: "border-teal-500/20" };
+}
+
 const PROGRESS_STEPS = [
   "Extracting content from source...",
   "Identifying prompts and workflow steps...",
   "Detecting platform and tools...",
   "Generating prompt template...",
+  "Selecting best AI tools for each step...",
   "Building skill package...",
   "Creating workflow guide...",
 ];
@@ -116,7 +153,7 @@ export default function ConvertForm() {
     setProgressStep(0);
   }
 
-  // ââ RESULTS VIEW ââ
+  // ── RESULTS VIEW ──
   if (result) {
     return (
       <div className="animate-fadeIn">
@@ -127,24 +164,40 @@ export default function ConvertForm() {
           </div>
           <div className="flex items-center gap-3">
             <span className="px-3 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-bold">
-              â Conversion Complete
+              ✓ Conversion Complete
             </span>
-            <button onClick={reset} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 text-slate-300 text-sm font-semibold hover:bg-slate-700 transition-colors">
-              <ArrowLeft size={14} /> New Conversion
+            <button
+              onClick={reset}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 text-slate-300 text-sm font-semibold hover:bg-slate-700 transition-colors"
+            >
+              <ArrowLeft size={14} />
+              New Conversion
             </button>
           </div>
         </div>
 
         {/* Tabs */}
         <div className="flex gap-1 mb-4 bg-slate-900/50 p-1 rounded-lg w-fit">
-          <button onClick={() => setActiveTab("prompt")} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ${activeTab === "prompt" ? "bg-orange-500/15 text-orange-400" : "text-slate-400 hover:text-slate-300"}`}>
-            <BookOpen size={14} /> Prompt Template
+          <button
+            onClick={() => setActiveTab("prompt")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ${activeTab === "prompt" ? "bg-orange-500/15 text-orange-400" : "text-slate-400 hover:text-slate-300"}`}
+          >
+            <BookOpen size={14} />
+            Prompt Template
           </button>
-          <button onClick={() => setActiveTab("skill")} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ${activeTab === "skill" ? "bg-purple-500/15 text-purple-400" : "text-slate-400 hover:text-slate-300"}`}>
-            <FileCode size={14} /> Cowork Skill
+          <button
+            onClick={() => setActiveTab("skill")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ${activeTab === "skill" ? "bg-purple-500/15 text-purple-400" : "text-slate-400 hover:text-slate-300"}`}
+          >
+            <FileCode size={14} />
+            Cowork Skill
           </button>
-          <button onClick={() => setActiveTab("workflow")} className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ${activeTab === "workflow" ? "bg-teal-500/15 text-teal-400" : "text-slate-400 hover:text-slate-300"}`}>
-            <ListChecks size={14} /> Workflow Guide
+          <button
+            onClick={() => setActiveTab("workflow")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-colors ${activeTab === "workflow" ? "bg-teal-500/15 text-teal-400" : "text-slate-400 hover:text-slate-300"}`}
+          >
+            <ListChecks size={14} />
+            Workflow Guide
           </button>
         </div>
 
@@ -158,11 +211,16 @@ export default function ConvertForm() {
                 <p className="text-sm text-slate-400 mt-1">{result.prompt_template.description}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => copyToClipboard(result.prompt_template.content, "prompt")} className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition-colors flex items-center gap-1.5">
-                  <Clipboard size={12} /> {copied === "prompt" ? "Copied!" : "Copy"}
+                <button
+                  onClick={() => copyToClipboard(result.prompt_template.content, "prompt")}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition-colors flex items-center gap-1.5"
+                >
+                  <Clipboard size={12} />
+                  {copied === "prompt" ? "Copied!" : "Copy"}
                 </button>
               </div>
             </div>
+
             {result.prompt_template.variables.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {result.prompt_template.variables.map((v) => (
@@ -170,6 +228,7 @@ export default function ConvertForm() {
                 ))}
               </div>
             )}
+
             <pre className="bg-slate-950 border border-slate-800 rounded-lg p-4 text-sm text-slate-300 font-mono whitespace-pre-wrap max-h-96 overflow-y-auto leading-relaxed">
               {result.prompt_template.content}
             </pre>
@@ -186,14 +245,23 @@ export default function ConvertForm() {
                 <p className="text-sm text-slate-400 mt-1">{result.skill_file.description}</p>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => copyToClipboard(result.skill_file.content, "skill")} className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition-colors flex items-center gap-1.5">
-                  <Clipboard size={12} /> {copied === "skill" ? "Copied!" : "Copy"}
+                <button
+                  onClick={() => copyToClipboard(result.skill_file.content, "skill")}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition-colors flex items-center gap-1.5"
+                >
+                  <Clipboard size={12} />
+                  {copied === "skill" ? "Copied!" : "Copy"}
                 </button>
-                <button onClick={() => downloadFile("SKILL.md", result.skill_file.content)} className="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-semibold hover:bg-purple-700 transition-colors flex items-center gap-1.5">
-                  <Download size={12} /> Download .skill
+                <button
+                  onClick={() => downloadFile("SKILL.md", result.skill_file.content)}
+                  className="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-semibold hover:bg-purple-700 transition-colors flex items-center gap-1.5"
+                >
+                  <Download size={12} />
+                  Download .skill
                 </button>
               </div>
             </div>
+
             <pre className="bg-slate-950 border border-slate-800 rounded-lg p-4 text-sm text-slate-300 font-mono whitespace-pre-wrap max-h-96 overflow-y-auto leading-relaxed">
               {result.skill_file.content}
             </pre>
@@ -210,8 +278,8 @@ export default function ConvertForm() {
                 <p className="text-sm text-slate-400 mt-1">{result.workflow_guide.description}</p>
               </div>
               <div className="flex gap-3 text-xs text-slate-500">
-                <span>â± {result.workflow_guide.time_estimate}</span>
-                <span>ð {result.workflow_guide.difficulty}</span>
+                <span>⏲ {result.workflow_guide.time_estimate}</span>
+                <span>📊 {result.workflow_guide.difficulty}</span>
               </div>
             </div>
 
@@ -221,9 +289,32 @@ export default function ConvertForm() {
                   <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-teal-500/15 text-teal-400 flex items-center justify-center text-sm font-bold">
                     {step.step}
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h4 className="text-sm font-bold text-white">{step.title}</h4>
                     <p className="text-sm text-slate-400 mt-1 leading-relaxed">{step.instruction}</p>
+
+                    {/* Recommended Tools */}
+                    {step.recommended_tools && step.recommended_tools.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {step.recommended_tools.map((tool, i) => {
+                          const colors = getToolColor(tool.name);
+                          return (
+                            <div
+                              key={i}
+                              className={`group relative inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-semibold ${colors.bg} ${colors.text} ${colors.border}`}
+                            >
+                              <Wrench size={10} />
+                              {tool.name}
+                              <div className="absolute bottom-full left-0 mb-1.5 hidden group-hover:block z-10">
+                                <div className="bg-slate-800 border border-slate-700 text-slate-300 text-xs rounded-lg px-3 py-2 shadow-xl max-w-[240px] whitespace-normal font-normal">
+                                  {tool.reason}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -231,9 +322,9 @@ export default function ConvertForm() {
 
             {result.workflow_guide.pro_tips.length > 0 && (
               <div className="bg-teal-500/5 border border-teal-500/20 rounded-lg p-4">
-                <h4 className="text-sm font-bold text-teal-400 mb-2">ð¡ Pro Tips</h4>
+                <h4 className="text-sm font-bold text-teal-400 mb-2">💡 Pro Tips</h4>
                 {result.workflow_guide.pro_tips.map((tip, i) => (
-                  <p key={i} className="text-sm text-slate-400 mb-1">â¢ {tip}</p>
+                  <p key={i} className="text-sm text-slate-400 mb-1">• {tip}</p>
                 ))}
               </div>
             )}
@@ -243,7 +334,7 @@ export default function ConvertForm() {
     );
   }
 
-  // ââ LOADING VIEW ââ
+  // ── LOADING VIEW ──
   if (loading) {
     return (
       <div className="flex flex-col items-center py-16 animate-fadeIn">
@@ -252,8 +343,11 @@ export default function ConvertForm() {
         <p className="text-sm text-slate-400 mb-8">This usually takes 15-30 seconds</p>
         <div className="w-full max-w-md space-y-3">
           {PROGRESS_STEPS.map((step, i) => (
-            <div key={i} className={`flex items-center gap-3 text-sm transition-all duration-300 ${i < progressStep ? "text-teal-400" : i === progressStep ? "text-white" : "text-slate-600"}`}>
-              <span className="w-5 font-bold">{i < progressStep ? "â" : i === progressStep ? "â" : "â"}</span>
+            <div
+              key={i}
+              className={`flex items-center gap-3 text-sm transition-all duration-300 ${i < progressStep ? "text-teal-400" : i === progressStep ? "text-white" : "text-slate-600"}`}
+            >
+              <span className="w-5 font-bold">{i < progressStep ? "✓" : i === progressStep ? "●" : "○"}</span>
               <span>{step}</span>
             </div>
           ))}
@@ -262,19 +356,17 @@ export default function ConvertForm() {
     );
   }
 
-  // ââ INPUT VIEW ââ
+  // ── INPUT VIEW ──
   return (
     <div>
       <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-6 mb-4">
         <h2 className="text-lg font-bold text-white mb-4">Paste your AI tip or link</h2>
-
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder={`Paste a link or the text from any social media post...\n\nSupported: Instagram, TikTok, YouTube, X links — or just paste the text directly.\n\nExample: "Turn Claude Code into your Professional Designer â Use these 3 systems to up-level the design of your next project:\n\n1. Create a design-system.md file with your brand colors, fonts, and spacing rules\n2. Use a screenshot of a design you love as reference\n3. Add a 'review' step where Claude critiques its own work..."`}
+          placeholder={`Paste a link or the text from any social media post...\n\nSupported: Instagram, TikTok, YouTube, X links — or just paste the text directly.\n\nExample: "Turn Claude Code into your Professional Designer — Use these 3 systems to up-level the design of your next project:\n\n1. Create a design-system.md file with your brand colors, fonts, and spacing rules\n2. Use a screenshot of a design you love as reference\n3. Add a 'review' step where Claude critiques its own work..."`}
           className="w-full min-h-[180px] p-4 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 font-mono leading-relaxed resize-y outline-none focus:border-teal-500/50 transition-colors placeholder:text-slate-600"
         />
-
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-3">
             <label className="text-sm text-slate-400">Target platform:</label>
@@ -289,13 +381,13 @@ export default function ConvertForm() {
               <option value="gemini">Gemini</option>
             </select>
           </div>
-
           <button
             onClick={handleConvert}
             disabled={!content.trim()}
             className="flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-teal-500 to-teal-600 text-slate-900 font-bold text-sm hover:shadow-lg hover:shadow-teal-500/20 hover:-translate-y-0.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
-            <Zap size={16} /> Forge It
+            <Zap size={16} />
+            Forge It
           </button>
         </div>
       </div>
@@ -311,9 +403,18 @@ export default function ConvertForm() {
         <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Try an example</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
-            { label: "AI Designer", text: "Turn Claude Code into your Professional Designer â Use these 3 systems to up-level the design of your next project: 1. Create a design-system.md file with your brand colors, fonts, and spacing rules. 2. Use a screenshot of a design you love as reference â Claude will match the style. 3. Add a review step where Claude critiques its own work against your design system and fixes issues automatically." },
-            { label: "Content Engine", text: "Here's how I turned Claude into my content engine: First, I created a content-strategy.md with my brand voice, target audience, and content pillars. Then I set up a workflow where Claude generates 10 content ideas, I pick 3, and it drafts full posts optimized for each platform (LinkedIn, X, Instagram). Finally, Claude reviews each post against my brand voice guidelines and suggests improvements." },
-            { label: "Email Outreach", text: "Stop writing cold emails from scratch. Here's my Claude workflow for personalized outreach: 1. Feed it the prospect's LinkedIn profile URL 2. Tell it your product and value prop 3. It generates 3 email variations with different hooks 4. Each email has a personalization line, clear value prop, and soft CTA 5. It also creates follow-up sequences for each variation." },
+            {
+              label: "AI Designer",
+              text: "Turn Claude Code into your Professional Designer — Use these 3 systems to up-level the design of your next project: 1. Create a design-system.md file with your brand colors, fonts, and spacing rules. 2. Use a screenshot of a design you love as reference — Claude will match the style. 3. Add a review step where Claude critiques its own work against your design system and fixes issues automatically.",
+            },
+            {
+              label: "Content Engine",
+              text: "Here's how I turned Claude into my content engine: First, I created a content-strategy.md with my brand voice, target audience, and content pillars. Then I set up a workflow where Claude generates 10 content ideas, I pick 3, and it drafts full posts optimized for each platform (LinkedIn, X, Instagram). Finally, Claude reviews each post against my brand voice guidelines and suggests improvements.",
+            },
+            {
+              label: "Email Outreach",
+              text: "Stop writing cold emails from scratch. Here's my Claude workflow for personalized outreach: 1. Feed it the prospect's LinkedIn profile URL 2. Tell it your product and value prop 3. It generates 3 email variations with different hooks 4. Each email has a personalization line, clear value prop, and soft CTA 5. It also creates follow-up sequences for each variation.",
+            },
           ].map((ex) => (
             <button
               key={ex.label}
