@@ -80,7 +80,7 @@ const PROGRESS_STEPS = [
   "Creating workflow guide...",
 ];
 
-export default function ConvertForm() {
+export default function ConvertForm({ model }: { model?: string }) {
   const [content, setContent] = useState("");
   const [platform, setPlatform] = useState("universal");
   const [loading, setLoading] = useState(false);
@@ -106,7 +106,7 @@ export default function ConvertForm() {
       const res = await fetch("/api/convert", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, platform }),
+        body: JSON.stringify({ content, platform, model: model || "gemini-flash" }),
       });
 
       const data = await res.json();
@@ -153,7 +153,7 @@ export default function ConvertForm() {
     setProgressStep(0);
   }
 
-  // ── RESULTS VIEW ──
+  // ââ RESULTS VIEW ââ
   if (result) {
     return (
       <div className="animate-fadeIn">
@@ -164,7 +164,7 @@ export default function ConvertForm() {
           </div>
           <div className="flex items-center gap-3">
             <span className="px-3 py-1 rounded-md bg-emerald-500/10 text-emerald-400 text-xs font-bold">
-              ✓ Conversion Complete
+              â Conversion Complete
             </span>
             <button
               onClick={reset}
@@ -278,8 +278,8 @@ export default function ConvertForm() {
                 <p className="text-sm text-slate-400 mt-1">{result.workflow_guide.description}</p>
               </div>
               <div className="flex gap-3 text-xs text-slate-500">
-                <span>⏲ {result.workflow_guide.time_estimate}</span>
-                <span>📊 {result.workflow_guide.difficulty}</span>
+                <span>â² {result.workflow_guide.time_estimate}</span>
+                <span>ð {result.workflow_guide.difficulty}</span>
               </div>
             </div>
 
@@ -322,9 +322,9 @@ export default function ConvertForm() {
 
             {result.workflow_guide.pro_tips.length > 0 && (
               <div className="bg-teal-500/5 border border-teal-500/20 rounded-lg p-4">
-                <h4 className="text-sm font-bold text-teal-400 mb-2">💡 Pro Tips</h4>
+                <h4 className="text-sm font-bold text-teal-400 mb-2">ð¡ Pro Tips</h4>
                 {result.workflow_guide.pro_tips.map((tip, i) => (
-                  <p key={i} className="text-sm text-slate-400 mb-1">• {tip}</p>
+                  <p key={i} className="text-sm text-slate-400 mb-1">â¢ {tip}</p>
                 ))}
               </div>
             )}
@@ -334,7 +334,7 @@ export default function ConvertForm() {
     );
   }
 
-  // ── LOADING VIEW ──
+  // ââ LOADING VIEW ââ
   if (loading) {
     return (
       <div className="flex flex-col items-center py-16 animate-fadeIn">
@@ -347,7 +347,7 @@ export default function ConvertForm() {
               key={i}
               className={`flex items-center gap-3 text-sm transition-all duration-300 ${i < progressStep ? "text-teal-400" : i === progressStep ? "text-white" : "text-slate-600"}`}
             >
-              <span className="w-5 font-bold">{i < progressStep ? "✓" : i === progressStep ? "●" : "○"}</span>
+              <span className="w-5 font-bold">{i < progressStep ? "â" : i === progressStep ? "â" : "â"}</span>
               <span>{step}</span>
             </div>
           ))}
@@ -356,7 +356,7 @@ export default function ConvertForm() {
     );
   }
 
-  // ── INPUT VIEW ──
+  // ââ INPUT VIEW ââ
   return (
     <div>
       <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-6 mb-4">
@@ -364,7 +364,7 @@ export default function ConvertForm() {
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder={`Paste a link or the text from any social media post...\n\nSupported: Instagram, TikTok, YouTube, X links — or just paste the text directly.\n\nExample: "Turn Claude Code into your Professional Designer — Use these 3 systems to up-level the design of your next project:\n\n1. Create a design-system.md file with your brand colors, fonts, and spacing rules\n2. Use a screenshot of a design you love as reference\n3. Add a 'review' step where Claude critiques its own work..."`}
+          placeholder={`Paste a link or the text from any social media post...\n\nSupported: Instagram, TikTok, YouTube, X links â or just paste the text directly.\n\nExample: "Turn Claude Code into your Professional Designer â Use these 3 systems to up-level the design of your next project:\n\n1. Create a design-system.md file with your brand colors, fonts, and spacing rules\n2. Use a screenshot of a design you love as reference\n3. Add a 'review' step where Claude critiques its own work..."`}
           className="w-full min-h-[180px] p-4 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-200 font-mono leading-relaxed resize-y outline-none focus:border-teal-500/50 transition-colors placeholder:text-slate-600"
         />
         <div className="flex items-center justify-between mt-4">
@@ -405,7 +405,7 @@ export default function ConvertForm() {
           {[
             {
               label: "AI Designer",
-              text: "Turn Claude Code into your Professional Designer — Use these 3 systems to up-level the design of your next project: 1. Create a design-system.md file with your brand colors, fonts, and spacing rules. 2. Use a screenshot of a design you love as reference — Claude will match the style. 3. Add a review step where Claude critiques its own work against your design system and fixes issues automatically.",
+              text: "Turn Claude Code into your Professional Designer â Use these 3 systems to up-level the design of your next project: 1. Create a design-system.md file with your brand colors, fonts, and spacing rules. 2. Use a screenshot of a design you love as reference â Claude will match the style. 3. Add a review step where Claude critiques its own work against your design system and fixes issues automatically.",
             },
             {
               label: "Content Engine",
