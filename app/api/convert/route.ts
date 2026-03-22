@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { CONVERSION_SYSTEM_PROMPT, CONVERSION_USER_PROMPT } from "@/lib/prompts";
 
+export const maxDuration = 60;
+
 // Extract content from a URL by fetching the page
 async function extractContentFromUrl(url: string): Promise<{ content: string; source: string }> {
   // Try Instagram oEmbed API
